@@ -1,39 +1,104 @@
 class Carrera {
 
     var nombre
-    var materias = []
+    var materias 
 
     method nombre() = nombre
 
     method materias() = materias
+
+    method agregarAMaterias(materia) = materias.add(materia)
 }
 
-const programacion = new Carrera(nombre = "Programación") {}
+const programacion = new Carrera(nombre = "Programación", materias = [matematica1, objetos1])
 
 class Materia  {
 
     var nombre
     var carrera
     var inscriptos = []
+    var requisitos 
+    var correlativas 
+    var listaEspera = []
+    var cupo
 
     method nombre() = nombre
 
     method carrera() = carrera
 
     method inscriptos() = inscriptos
+
+    method agregarAInscripto(estudiante) = inscriptos.add(estudiante)
+
+    method requisitos() = requisitos
+
+    method correlativas() = correlativas
+
+    method listaEspera() = listaEspera
+
+    method agregarAListaEspera(estudiante) = listaEspera.add(estudiante)
+
+    method resultadoDeInscripcion(estudiante) {
+        if (not self.hayCuposEnMateria()) {
+            self.agregarAListaEspera(estudiante)
+        } else {
+            self.agregarAInscripto(estudiante)
+        }
+    }
+
+    method hayCuposEnMateria() {
+        return self.nroDeInscriptos() < cupo
+    }
+
+    method nroDeInscriptos() {
+        return inscriptos.count()
+    }
+
+    method darDeBajaAEstudiante(estudiante) {
+        if (not self.hayEnInscriptoEstudiante(estudiante)) {
+            self.sacarDeListaDeEsperaAEstudiante(estudiante)
+        } else {
+            const primeroDeEspera = listaEspera.first()
+            self.sacarDeInscriptoAEstudiante(estudiante)
+            self.sacarDeListaDeEsperaAEstudiante(primeroDeEspera)
+            self.agregarAInscripto(primeroDeEspera)
+        }
+    }
+
+    method hayEnInscriptoEstudiante(estudiante) {
+        return inscriptos.contains(estudiante)
+    }
+
+    method hayEnListaDeEsperaEstudiante(estudiante) {
+        return listaEspera.contains(estudiante)
+    }
+
+    method hayEnInscriptoOEsperaEstudiante(estudiante) {
+        return self.hayEnInscriptoEstudiante(estudiante) || self.hayEnListaDeEsperaEstudiante(estudiante)
+    }
+
+    method sacarDeListaDeEsperaAEstudiante(estudiante) {
+        listaEspera.remove(estudiante)
+    }
+
+    method sacarDeInscriptoAEstudiante(estudiante) {
+        inscriptos.remove(estudiante)
+    }
 }
 
-const matematica1 = new Materia(nombre = "Matemática 1", carrera = programacion) {}
+const matematica1 = new Materia(nombre = "Matemática 1", carrera = programacion, requisitos = false, correlativas = [], cupo = 30)
 
-const objetos1 = new Materia(nombre = "Objetos 1", carrera = programacion) {}
+const objetos1 = new Materia(nombre = "Objetos 1", carrera = programacion, requisitos = false, correlativas = [], cupo = 30) 
 
 class Estudiante {
 
     var nombre
-    var carrera = []
+    var carreras = []
     var aprobada = []
 
-    method agregarCarrera(_carrera) = carrera.add(_carrera)
+    method nombre() = nombre
+    
+    method agregarCarrera(carrera) = carreras.add(carrera)
 
     method agregarAprobada(materia) = aprobada.add(materia)
 
@@ -62,23 +127,67 @@ class Estudiante {
     }
 
     method materiasDeCarrera() {
-        return carrera.forEach({carrera => carrera.materias()})
+        return carreras.map({carrera => carrera.materias()})
     }
 
-    method inscripto() {
+    method todasLasMateriasDeCarrerasQueCursa() {  
         return [self.materiasDeCarrera()].flatten()
     }
 
-    method puedeAnotarseEnMateria(materia) {
-        return self.estaEnCarreraCon(materia) && self.tieneAprobada(materia) && not self.estaInscriptoEn(materia) && self.tieneAprobadaCorrelativasDe(materia) 
+    method puedeAnotarseEn(materia) {
+        return self.estaEnCarreraCon(materia) && not self.tieneAprobada(materia) && self.cumpleCondicionesInscripcionCon(materia) 
     }
 
     method estaEnCarreraCon(materia) {
-        return not carrera.isEmpty() && self.tieneCarreraCon(materia)
+        return not carreras.isEmpty() && self.tieneCarreraCon(materia)
     }
 
     method tieneCarreraCon(materia) {
         return self.materiasDeCarrera().any({materia => materia == materia})
+    }
+
+    method cumpleCondicionesInscripcionCon(materia) {
+        return not self.estaInscriptoEn(materia) && self.tieneAprobadaCorrelativasDe(materia)
+    }
+    
+    method estaInscriptoEn(materia) {
+        return materia.inscriptos().any({estudiante => estudiante.nombre() == self.nombre()})
+    }
+    
+    method tieneAprobadaCorrelativasDe(materia) {
+        return not materia.requisitos() && self.estanAprobadaCorrelativasDeMateria(materia)
+    }
+
+    method estanAprobadaCorrelativasDeMateria(materia) {
+        return materia.correlativas().all({correlativa => self.tieneAprobada(correlativa)})
+    }
+
+    method inscribirAMateria(materia) {
+        if (not self.puedeAnotarseEn(materia)) {
+            self.error("No cumple con las condiciones para inscribirse")
+        } else {
+            materia.resultadoDeInscripcion(self)
+        }
+    }
+
+    method darDeBajaEnMateria(materia) {
+        materia.darDeBajaAEstudiante(self)
+    }
+
+    method informacionUtil() {
+        return self.todasLasMateriasDeCarrerasQueCursa().filter({materia => materia.hayEnInscriptoOEsperaEstudiante(self)})
+    }
+
+    method materiasEnDondeEstaInscripto(carrera) {
+        if (not self.estaEnCarrera(carrera)) {
+            return[]    
+        } else {
+            return carrera.materias().filter({materia => self.puedeAnotarseEn(materia)})
+        }
+    }
+
+    method estaEnCarrera(carrera) {
+        return carreras.contains(carrera)
     }
 
 }

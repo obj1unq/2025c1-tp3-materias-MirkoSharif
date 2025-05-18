@@ -1,0 +1,60 @@
+import materias.*
+
+describe "testeo de materias" {
+  
+  const biologia1 = new Materia(nombre = "Biologia 1", carrera = programacion, correlativas = [], cupo = 30)
+  
+  const quimica = new Materia(nombre = "Quimica", carrera = programacion, correlativas = [], cupo = 30)
+
+  const objetos1 = new Materia(nombre = "Objetos 1", carrera = programacion, correlativas = [], cupo = 30) 
+
+  const matematica1 = new Materia(nombre = "Matemática 1", carrera = programacion, correlativas = [], cupo = 30)
+
+  const baseDeDatos = new Materia(nombre = "Base De Datos", carrera = programacion, correlativas = [], cupo = 30)
+
+  const elementosDeProgramacion = new Materia(nombre = "Elementos De Programacion", carrera = programacion, correlativas = [], cupo = 30)  
+
+  
+  
+  const objetos2 = new Materia(nombre = "Objetos 2", carrera = programacion, correlativas = [objetos1, matematica1], cupo = 3) 
+  
+  const objetos3 = new Materia(nombre = "Objetos 3", carrera = programacion, correlativas = [objetos2, baseDeDatos], cupo = 30) 
+  
+  const programacionConcurrente= new Materia(nombre = "Programacion Concurrente", carrera = programacion, correlativas = [objetos1, baseDeDatos], cupo = 30) 
+
+  const biologia2 = new Materia(nombre = "Biologia 2", carrera = programacion, correlativas = [biologia1], cupo = 30)
+  
+  const roque = new Estudiante(carreras = [programacion, medicina],aprobada = [
+    new Aprobacion(materia = elementosDeProgramacion, nota = 10), 
+    new Aprobacion(materia = matematica1, nota = 10), 
+    new Aprobacion(materia = objetos1, nota = 10), 
+    new Aprobacion(materia = baseDeDatos, nota = 10), 
+    new Aprobacion(materia = quimica, nota = 10), 
+    new Aprobacion (materia = biologia1, nota = 10)]) 
+  
+  const luisa = new Estudiante(carreras = [programacion], aprobada = [
+    new Aprobacion(materia = elementosDeProgramacion, nota = 10 ), 
+    new Aprobacion(materia = objetos1, nota = 10),
+    new Aprobacion(materia = matematica1, nota = 10)])
+
+  const romina = new Estudiante(carreras = [programacion], aprobada = [
+    new Aprobacion(materia = elementosDeProgramacion, nota = 10), 
+    new Aprobacion(materia = objetos1, nota = 10), 
+    new Aprobacion(materia = matematica1, nota = 10)])
+
+  const alicia = new Estudiante(carreras = [programacion], aprobada = [
+    new Aprobacion(materia = elementosDeProgramacion, nota = 10), 
+    new Aprobacion(materia = objetos1, nota = 10), 
+    new Aprobacion(materia = matematica1, nota = 10)])
+  
+  const Ana = new Estudiante(carreras = [programacion], aprobada = [
+    new Aprobacion(materia = elementosDeProgramacion, nota = 10)])
+
+  const programacion = new Carrera(nombre = "Programación", materias = [matematica1, objetos1, objetos2, objetos3, baseDeDatos])
+  
+  const medicina = new Carrera(nombre = "Medicina", materias = [biologia1, biologia2, quimica])
+  
+  test "roque puede anotarse en objetos2" {
+    assert.that(roque.puedeAnotarseEn(objetos2))
+  }
+}

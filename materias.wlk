@@ -10,14 +10,11 @@ class Carrera {
     method agregarAMaterias(materia) = materias.add(materia)
 }
 
-const programacion = new Carrera(nombre = "Programación", materias = [matematica1, objetos1])
-
 class Materia  {
 
     var nombre
     var carrera
     var inscriptos = []
-    var requisitos 
     var correlativas 
     var listaEspera = []
     var cupo
@@ -29,8 +26,6 @@ class Materia  {
     method inscriptos() = inscriptos
 
     method agregarAInscripto(estudiante) = inscriptos.add(estudiante)
-
-    method requisitos() = requisitos
 
     method correlativas() = correlativas
 
@@ -85,18 +80,11 @@ class Materia  {
         inscriptos.remove(estudiante)
     }
 }
-
-const matematica1 = new Materia(nombre = "Matemática 1", carrera = programacion, requisitos = false, correlativas = [], cupo = 30)
-
-const objetos1 = new Materia(nombre = "Objetos 1", carrera = programacion, requisitos = false, correlativas = [], cupo = 30) 
-
 class Estudiante {
 
-    var nombre
-    var carreras = []
-    var aprobada = []
+    var carreras 
+    var aprobada 
 
-    method nombre() = nombre
     
     method agregarCarrera(carrera) = carreras.add(carrera)
 
@@ -151,14 +139,10 @@ class Estudiante {
     }
     
     method estaInscriptoEn(materia) {
-        return materia.inscriptos().any({estudiante => estudiante.nombre() == self.nombre()})
+        return materia.inscriptos().any({estudiante => estudiante == self})
     }
     
     method tieneAprobadaCorrelativasDe(materia) {
-        return not materia.requisitos() && self.estanAprobadaCorrelativasDeMateria(materia)
-    }
-
-    method estanAprobadaCorrelativasDeMateria(materia) {
         return materia.correlativas().all({correlativa => self.tieneAprobada(correlativa)})
     }
 
@@ -191,7 +175,6 @@ class Estudiante {
     }
 
 }
-const roque = new Estudiante(nombre = "Roque")
 
 class Aprobacion {
   

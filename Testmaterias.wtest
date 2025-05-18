@@ -2,35 +2,34 @@ import materias.*
 
 describe "testeo de materias" {
   
-  const biologia1 = new Materia(nombre = "Biologia 1", carrera = programacion, correlativas = [], cupo = 30)
+  const biologia1 = new Materia(nombre = "Biologia 1", inscriptos = [],   /*carrera = [programacion],*/ correlativas = [], listaEspera = [],cupo = 30)
   
-  const quimica = new Materia(nombre = "Quimica", carrera = programacion, correlativas = [], cupo = 30)
+  const quimica = new Materia(nombre = "Quimica", inscriptos = [],/*carrera = [programacion],*/ correlativas = [], listaEspera = [], cupo = 30)
 
-  const objetos1 = new Materia(nombre = "Objetos 1", carrera = programacion, correlativas = [], cupo = 30) 
+  const objetos1 = new Materia(nombre = "Objetos 1", inscriptos = [], /*carrera = [programacion],*/ correlativas = [], listaEspera = [], cupo = 30) 
 
-  const matematica1 = new Materia(nombre = "Matemática 1", carrera = programacion, correlativas = [], cupo = 30)
+  const matematica1 = new Materia(nombre = "Matemática 1", inscriptos = [],/* carrera = [programacion],*/ correlativas = [], listaEspera = [], cupo = 30)
 
-  const baseDeDatos = new Materia(nombre = "Base De Datos", carrera = programacion, correlativas = [], cupo = 30)
+  const baseDeDatos = new Materia(nombre = "Base De Datos", inscriptos = [],/*carrera = [programacion],*/ correlativas = [], listaEspera = [], cupo = 30)
 
-  const elementosDeProgramacion = new Materia(nombre = "Elementos De Programacion", carrera = programacion, correlativas = [], cupo = 30)  
+  const elementosDeProgramacion = new Materia(nombre = "Elementos De Programacion", inscriptos = [],/*carrera = [programacion],*/ correlativas = [], listaEspera = [], cupo = 30)  
 
   
   
-  const objetos2 = new Materia(nombre = "Objetos 2", carrera = programacion, correlativas = [objetos1, matematica1], cupo = 3) 
+  const objetos2 = new Materia(nombre = "Objetos 2", inscriptos = [], correlativas = [objetos1, matematica1], listaEspera = [], cupo = 3) 
   
-  const objetos3 = new Materia(nombre = "Objetos 3", carrera = programacion, correlativas = [objetos2, baseDeDatos], cupo = 30) 
+  const objetos3 = new Materia(nombre = "Objetos 3", inscriptos = [],/*carrera = [programacion],*/ correlativas = [objetos2, baseDeDatos], listaEspera = [], cupo = 30) 
   
-  const programacionConcurrente= new Materia(nombre = "Programacion Concurrente", carrera = programacion, correlativas = [objetos1, baseDeDatos], cupo = 30) 
+  const programacionConcurrente= new Materia(nombre = "Programacion Concurrente", inscriptos = [],/*carrera = [programacion],*/ correlativas = [objetos1, baseDeDatos], listaEspera = [], cupo = 30) 
 
-  const biologia2 = new Materia(nombre = "Biologia 2", carrera = programacion, correlativas = [biologia1], cupo = 30)
+  const biologia2 = new Materia(nombre = "Biologia 2", inscriptos = [],/*carrera = [programacion],*/ correlativas = [biologia1], listaEspera = [], cupo = 30)
   
   const roque = new Estudiante(carreras = [programacion, medicina],aprobada = [
     new Aprobacion(materia = elementosDeProgramacion, nota = 10), 
     new Aprobacion(materia = matematica1, nota = 10), 
     new Aprobacion(materia = objetos1, nota = 10), 
     new Aprobacion(materia = baseDeDatos, nota = 10), 
-    new Aprobacion(materia = quimica, nota = 10), 
-    new Aprobacion (materia = biologia1, nota = 10)]) 
+    new Aprobacion(materia = quimica, nota = 10)]) 
   
   const luisa = new Estudiante(carreras = [programacion], aprobada = [
     new Aprobacion(materia = elementosDeProgramacion, nota = 10 ), 
@@ -56,5 +55,72 @@ describe "testeo de materias" {
   
   test "roque puede anotarse en objetos2" {
     assert.that(roque.puedeAnotarseEn(objetos2))
+  }
+
+  test "roque NO puede anotarse en objetos3" {
+    assert.notThat(roque.puedeAnotarseEn(objetos3))
+  }
+
+  test "roque NO puede anotarse en objetos1" {
+    assert.notThat(roque.puedeAnotarseEn(objetos1))
+  }
+
+  test "roque puede inscribirse en objetos2 y en programacion concurrente" {
+    assert.that(roque.puedeAnotarseEn(objetos2))
+    assert.that(roque.puedeAnotarseEn(programacionConcurrente))
+  }
+
+  test "roque puede inscribirse en biologia2" {
+    assert.that(roque.puedeAnotarseEn(biologia2))
+  }
+
+  test "Luisa, Romina, Alicia y Roque se inscriben en objetos2" {
+    assert.that(luisa.puedeAnotarseEn(objetos2))
+    assert.that(romina.puedeAnotarseEn(objetos2))
+    assert.that(alicia.puedeAnotarseEn(objetos2))
+    assert.that(roque.puedeAnotarseEn(objetos2))    
+  }
+
+  test "Luisa, Romina, Alicia y Roque se inscriben en objetos2, las dos primeras quedan confirmadas" {
+    assert.that(luisa.puedeAnotarseEn(objetos2))
+    assert.that(romina.puedeAnotarseEn(objetos2))
+    assert.that(alicia.puedeAnotarseEn(objetos2))
+
+    objetos2.agregarAInscripto(luisa)
+    objetos2.agregarAInscripto(romina)
+    objetos2.agregarAInscripto(alicia)
+    assert.that(objetos2.hayEnInscriptoEstudiante(luisa))
+    assert.that(objetos2.hayEnInscriptoEstudiante(romina))
+  }
+
+  test "Roque se inscriben en objetos2 y queda en lista de espera" { //Nose porque da error (supuestamente por el count)
+    assert.that(roque.puedeAnotarseEn(objetos2))
+
+    luisa.inscribirAMateria(objetos2)
+    romina.inscribirAMateria(objetos2)
+    alicia.inscribirAMateria(objetos2)
+    roque.inscribirAMateria(objetos2)
+
+    assert.that(objetos2.hayEnInscriptoEstudiante(luisa))
+    assert.that(objetos2.hayEnInscriptoEstudiante(romina))
+    assert.that(objetos2.hayEnInscriptoEstudiante(alicia))
+    assert.that(objetos2.hayEnListaDeEsperaEstudiante(roque))
+  }
+
+  test "Dar de baja a romina en objetos2 y roque que estaba en la lista de espera pasa a estar inscripto" {
+    luisa.inscribirAMateria(objetos2)
+    romina.inscribirAMateria(objetos2)
+    alicia.inscribirAMateria(objetos2)
+    roque.inscribirAMateria(objetos2)
+
+    assert.that(objetos2.hayEnInscriptoEstudiante(luisa))
+    assert.that(objetos2.hayEnInscriptoEstudiante(romina))
+    assert.that(objetos2.hayEnInscriptoEstudiante(alicia))
+    assert.that(objetos2.hayEnListaDeEsperaEstudiante(roque))
+
+    romina.darDeBajaEnMateria(objetos2)
+
+    assert.that(objetos2.hayEnInscriptoEstudiante(roque))
+
   }
 }

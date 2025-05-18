@@ -13,15 +13,15 @@ class Carrera {
 class Materia  {
 
     var nombre
-    var carrera
-    var inscriptos = []
+    //var carrera
+    var inscriptos 
     var correlativas 
-    var listaEspera = []
+    var listaEspera 
     var cupo
 
     method nombre() = nombre
 
-    method carrera() = carrera
+    //method carrera() = carrera
 
     method inscriptos() = inscriptos
 

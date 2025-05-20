@@ -1,7 +1,7 @@
 class Carrera {
 
     var nombre
-    var materias 
+    var materias = #{}
 
     method nombre() = nombre
 
@@ -12,18 +12,19 @@ class Carrera {
 
 class Materia  {
 
-    var nombre
-    //var carrera
-    var inscriptos 
-    var correlativas 
-    var listaEspera 
+    const nombre
+    const inscriptos = []
+    const correlativas = #{}
+    const listaEspera  = []
     var cupo
 
     method nombre() = nombre
 
-    //method carrera() = carrera
-
     method inscriptos() = inscriptos
+
+    method esMateria(_materia) {
+        return nombre == _materia
+    }
 
     method agregarAInscripto(estudiante) = inscriptos.add(estudiante)
 
@@ -32,6 +33,10 @@ class Materia  {
     method listaEspera() = listaEspera
 
     method agregarAListaEspera(estudiante) = listaEspera.add(estudiante)
+
+    method estaInscriptoEn(materia, _estudiante) {
+        return self.inscriptos().any({estudiante => estudiante == _estudiante})
+    }
 
     method resultadoDeInscripcion(estudiante) {
         if (not self.hayCuposEnMateria()) {
@@ -82,36 +87,39 @@ class Materia  {
 }
 class Estudiante {
 
-    var carreras 
-    var aprobada 
+    var carreras = #{}
+    var aprobadas = #{}
 
     
     method agregarCarrera(carrera) = carreras.add(carrera)
 
-    method agregarAprobada(materia) = aprobada.add(materia)
+    method agregarAprobada(materia) = aprobadas.add(materia)
 
     method aprobar(materia, nota) {
+        self.validarTieneAprobada(materia, nota)
+        self.agregarAprobada(new Aprobada(materia = materia, nota = nota))
+    }
+
+    method validarTieneAprobada(materia, nota) {
         if(self.tieneAprobada(materia)) {
             self.error("Tiene la materia aprobada")
-        } else {
-            self.agregarAprobada(new Aprobacion(materia = materia, nota = nota))
         }
     }
 
     method tieneAprobada(materia){
-        return aprobada.any({aprobada => aprobada.materia() == materia})
+        return aprobadas.any({aprobada => materia.esMateria(materia)})
     }
 
     method totalEnNotas() {
-        return aprobada.sum({ aprobada => aprobada.nota()})
+        return aprobadas.sum({ aprobada => aprobada.nota()})
     }
 
-    method nroDeMaterias() {
-        return aprobada.count()
+    method nroDeAprobadas() {
+        return aprobadas.size()
     }
 
     method promedioDeNotas() {
-        return self.totalEnNotas() / self.nroDeMaterias()
+        return self.totalEnNotas() / self.nroDeAprobadas()
     }
 
     method materiasDeCarrera() {
@@ -119,7 +127,7 @@ class Estudiante {
     }
 
     method todasLasMateriasDeCarrerasQueCursa() {  
-        return [self.materiasDeCarrera()].flatten()
+        return [self.materiasDeCarrera()].flatten().asSet()
     }
 
     method puedeAnotarseEn(materia) {
@@ -135,11 +143,7 @@ class Estudiante {
     }
 
     method cumpleCondicionesInscripcionCon(materia) {
-        return not self.estaInscriptoEn(materia) && self.tieneAprobadaCorrelativasDe(materia)
-    }
-    
-    method estaInscriptoEn(materia) {
-        return materia.inscriptos().any({estudiante => estudiante == self})
+        return not materia.estaInscriptoEn(materia, self) && self.tieneAprobadaCorrelativasDe(materia)
     }
     
     method tieneAprobadaCorrelativasDe(materia) {
@@ -151,7 +155,7 @@ class Estudiante {
             self.error("No cumple con las condiciones para inscribirse")
         } else {
             materia.resultadoDeInscripcion(self)
-        }
+        } 
     }
 
     method darDeBajaEnMateria(materia) {
@@ -163,10 +167,13 @@ class Estudiante {
     }
 
     method materiasEnDondeEstaInscripto(carrera) {
+        self.validarInscriptoEn(carrera)
+        return carrera.materias().filter({materia => self.puedeAnotarseEn(materia)})
+    }
+
+    method validarInscriptoEn(carrera) {
         if (not self.estaEnCarrera(carrera)) {
-            return[]    
-        } else {
-            return carrera.materias().filter({materia => self.puedeAnotarseEn(materia)})
+            self.error("No esta inscripto en la carrera")
         }
     }
 
@@ -176,7 +183,7 @@ class Estudiante {
 
 }
 
-class Aprobacion {
+class Aprobada {
   
     var materia
     var nota 
